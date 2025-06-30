@@ -7,6 +7,57 @@ import { defaultHeader1, HeaderContainerProps } from './helper'
 import SearchBar from './SearchBar'
 import { isZaloPlatform } from '@components/utils'
 
+// Component IconButton
+interface IconButtonProps {
+  icon: keyof typeof Icons | string
+  onClick: () => void
+  cartLength?: number
+}
+
+const IconButton: FC<IconButtonProps> = ({ icon, onClick, cartLength }) => {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        position: 'relative',
+        cursor: 'pointer',
+        padding: '8px',
+        borderRadius: '50%',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        border: '1px solid rgba(0, 0, 0, 0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 40,
+        height: 40,
+      }}
+    >
+      <IconSVG name={icon as keyof typeof Icons} size={20} />
+      {cartLength && cartLength > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: -2,
+            right: -2,
+            backgroundColor: '#ff4444',
+            color: 'white',
+            borderRadius: '50%',
+            width: 16,
+            height: 16,
+            fontSize: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+          }}
+        >
+          {cartLength > 9 ? '9+' : cartLength}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const Header1: FC<HeaderContainerProps> = (props) => {
   const { settings, logo, cartLength, navigate } = props
 
@@ -113,39 +164,13 @@ const Header1: FC<HeaderContainerProps> = (props) => {
           )}
         </div>
       </div>
-      {hideOnScroll && (
-        <div
-          id='header-search-bar'
-          className='flex-row align-items-center gap-1'
-          style={{
-            display: visibleSearchBar ? 'flex' : 'none',
-            paddingTop: '5px',
-          }}
-        >
+      {visibleSearchBar && (
+        <div className='mt-2'>
           <SearchBar
             placeholderSearchBar={placeholderSearchBar}
             visibleFilterIcon={visibleFilterIcon}
-            onClick={() => !!navigate && navigate('/search')}
+            onClick={(href: string) => !!navigate && navigate(href)}
           />
-          <div
-            className='align-items-center gap-2'
-            id='header-search-actions'
-            style={{ display: 'none' }}
-          >
-            {visibleCartIcon && (
-              <IconButton
-                icon={'cart'}
-                onClick={() => !!navigate && navigate('/cart')}
-                cartLength={cartLength}
-              />
-            )}
-            {visibleMessageIcon && (
-              <IconButton
-                icon={'chat'}
-                onClick={() => !!navigate && navigate('/chat')}
-              />
-            )}
-          </div>
         </div>
       )}
     </div>
@@ -153,50 +178,3 @@ const Header1: FC<HeaderContainerProps> = (props) => {
 }
 
 export default Header1
-
-const IconButton = ({
-  icon,
-  onClick,
-  cartLength = undefined,
-}: {
-  icon: keyof typeof Icons
-  onClick: () => void
-  cartLength?: number | undefined
-}) => {
-  return (
-    <div className='position-relative h-100 d-flex align-items-center justify-content-center'>
-      <div
-        onClick={onClick}
-        className='rounded-circle d-flex align-items-center justify-content-center '
-        style={{
-          width: 32,
-          height: 32,
-          backgroundColor: 'rgba(255, 255, 255, 0.6)',
-          border: '1px solid rgba(0,0,0,0.1)',
-        }}
-      >
-        <IconSVG
-          name={icon}
-          size={20}
-          color='#344054'
-          strokeWidth={1.5}
-        />
-      </div>
-      {cartLength !== undefined && cartLength !== 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: -2,
-            width: 12,
-            height: 12,
-            fontSize: 8,
-          }}
-          className='font-base text-white bg-danger rounded-circle d-flex align-items-center justify-content-center text-center'
-        >
-          {cartLength}
-        </div>
-      )}
-    </div>
-  )
-}

@@ -6,6 +6,29 @@ import SearchBar from './SearchBar'
 import classNames from 'classnames'
 import { AppEnvironment } from '@helpers/linkApp'
 
+// Component IconButton cho Header5
+interface IconButtonProps {
+  icon: React.ReactNode
+  onClick: () => void
+}
+
+const IconButton: FC<IconButtonProps> = ({ icon, onClick }) => {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        cursor: 'pointer',
+        padding: '4px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {icon}
+    </div>
+  )
+}
+
 const Header5: FC<HeaderContainerProps> = (props) => {
   const { settings, cartLength, navigate, goBack } = props
   const isAiminiPlatform =
@@ -79,31 +102,28 @@ const Header5: FC<HeaderContainerProps> = (props) => {
               <IconButton
                 icon={<Buy size={18} />}
                 onClick={() => !!navigate && navigate('/cart')}
-                cartLength={cartLength}
               />
             )}
           </div>
-          {visibleTitle && (
-            <div
-              className='body-large-medium text-start text-truncate-1 w-50'
-              style={{ color: colorTitle, fontSize: fontSizeTitle }}
-            >
-              {title}
-            </div>
-          )}
+        </div>
+      )}
+      {visibleTitle && (
+        <div
+          className='body-medium-medium text-center mt-2'
+          style={{
+            color: colorTitle,
+            fontSize: fontSizeTitle,
+          }}
+        >
+          {title}
         </div>
       )}
       {visibleSearchBar && (
-        <div
-          style={{ marginTop: 7 }}
-          className={classNames('', {
-            'w-75': !visibleLeftIcon && !isAiminiPlatform,
-          })}
-        >
+        <div className='mt-2'>
           <SearchBar
             placeholderSearchBar={placeholderSearchBar}
             visibleFilterIcon={visibleFilterIcon}
-            onClick={() => !!navigate && navigate('/search')}
+            onClick={(href: string) => !!navigate && navigate(href)}
           />
         </div>
       )}
@@ -112,37 +132,3 @@ const Header5: FC<HeaderContainerProps> = (props) => {
 }
 
 export default Header5
-
-const IconButton = ({
-  icon,
-  onClick,
-  cartLength = undefined,
-}: {
-  icon: any
-  onClick: () => void
-  cartLength?: number | undefined
-}) => {
-  return (
-    <div
-      onClick={onClick}
-      className='position-relative d-flex align-items-center justify-content-center text-body-primary'
-    >
-      {icon}
-      {cartLength !== undefined && cartLength !== 0 && (
-        <div
-          style={{
-            position: 'absolute',
-            top: -3,
-            right: -6,
-            width: 12,
-            height: 12,
-            fontSize: 8,
-          }}
-          className='font-base text-white bg-danger rounded-circle d-flex align-items-center justify-content-center text-center'
-        >
-          {cartLength}
-        </div>
-      )}
-    </div>
-  )
-}

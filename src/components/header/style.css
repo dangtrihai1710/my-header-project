@@ -1,15 +1,118 @@
+/* Header Styles */
 .border-input-group-header {
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-}
-
-.form-control-search-header {
-  border-width: 0px !important;
-  height: 100% !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .input-group-text-header {
-  padding-right: 1px !important;
-  padding-left: 8px !important;
-  border-width: 0px !important;
-  background-color: white !important;
+  background-color: transparent;
+  border: none;
+  padding: 0 8px;
+}
+
+.form-control-search-header {
+  border: none;
+  background-color: transparent;
+  outline: none;
+}
+
+.form-control-search-header:focus {
+  box-shadow: none;
+  border: none;
+  outline: none;
+}
+
+/* Utility classes */
+.body-medium-medium {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.body-small-medium {
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.text-truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* Bootstrap utility classes fallback */
+.d-flex {
+  display: flex !important;
+}
+
+.align-items-center {
+  align-items: center !important;
+}
+
+.justify-content-between {
+  justify-content: space-between !important;
+}
+
+.justify-content-evenly {
+  justify-content: space-evenly !important;
+}
+
+.gap-2 {
+  gap: 0.5rem !important;
+}
+
+.me-2 {
+  margin-right: 0.5rem !important;
+}
+
+.mt-2 {
+  margin-top: 0.5rem !important;
+}
+
+.px-2 {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem !important;
+}
+
+.text-start {
+  text-align: left !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.rounded-pill {
+  border-radius: 50rem !important;
+}
+
+.overflow-hidden {
+  overflow: hidden !important;
+}
+
+.bg-white {
+  background-color: #fff !important;
+}
+
+.shadow-none {
+  box-shadow: none !important;
+}
+
+.sticky-top {
+  position: sticky !important;
+  top: 0 !important;
+}
+
+.ion-no-border {
+  border: none;
+}
+
+.ion-no-padding {
+  padding: 0;
 }
