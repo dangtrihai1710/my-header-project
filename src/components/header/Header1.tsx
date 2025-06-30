@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames'
 import React from 'react'
-import IconSVG, { Icons } from '@components/common/IconSVG'
-import logoAimini from '@static/images/logo'
+import IconSVG, { Icons } from '../common/IconSVG'
+import logoAimini from '../../static/images/logo'
 import { defaultHeader1, HeaderContainerProps } from './helper'
 import SearchBar from './SearchBar'
-import { isZaloPlatform } from '@components/utils'
+import { isZaloPlatform } from '../utils'
 
 // Component IconButton
 interface IconButtonProps {
@@ -103,77 +102,69 @@ const Header1: React.FC<HeaderContainerProps> = (props) => {
           !isZaloPlatform && 'justify-content-between'
         )}
         style={{
-          width: isZaloPlatform ? '80%' : '100%',
           display: 'flex',
-          flexDirection: 'row',
+          width: '100%',
         }}
       >
-        <div className='d-flex align-items-center'>
-          {visibleLogo && (
-            <img
-              className='me-2'
-              style={{ height: 40, objectFit: 'contain', maxWidth: 80 }}
-              src={logo || logoAimini}
-              alt="Logo"
+        {/* Logo */}
+        {visibleLogo && (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <img 
+              src={logo || logoAimini} 
+              alt="Logo" 
+              style={{ height: 32, objectFit: 'contain' }}
             />
-          )}
-          <div>
-            {visibleTitle && (
-              <div
-                className='body-medium-medium text-start text-truncate-1'
-                style={{
-                  color: colorTitle,
-                  fontSize: fontSizeTitle,
-                }}
-              >
-                {title}
-              </div>
-            )}
-            {visibleSubTitle && (
-              <div
-                className='body-small-medium text-start text-truncate-1'
-                style={{
-                  color: colorSubTitle,
-                  fontSize: fontSizeSubTitle,
-                  marginTop: 2,
-                }}
-              >
-                {subTitle}
-              </div>
-            )}
           </div>
+        )}
+
+        {/* Title & Subtitle */}
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          {visibleTitle && (
+            <div style={{ color: colorTitle, fontSize: fontSizeTitle }}>
+              {title}
+            </div>
+          )}
+          {visibleSubTitle && (
+            <div style={{ color: colorSubTitle, fontSize: fontSizeSubTitle }}>
+              {subTitle}
+            </div>
+          )}
         </div>
-        <div className='d-flex align-items-center gap-2'>
-          {visibleCartIcon && (
+
+        {/* Search Bar */}
+        {visibleSearchBar && (
+          <div style={{ flex: 2, margin: '0 10px' }}>
+            <SearchBar
+              placeholderSearchBar={placeholderSearchBar}
+              visibleFilterIcon={visibleFilterIcon}
+              onClick={(href: string) => !!navigate && navigate(href)}
+            />
+          </div>
+        )}
+
+        {/* Action Icons */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {visibleSearchIcon && !visibleSearchBar && (
             <IconButton
-              icon={'cart'}
-              onClick={() => !!navigate && navigate('/cart')}
-              cartLength={cartLength}
+              icon="search"
+              onClick={() => !!navigate && navigate('/search')}
             />
           )}
           {visibleMessageIcon && (
             <IconButton
-              icon={'chat'}
-              onClick={() => !!navigate && navigate('/chat')}
+              icon="chat"
+              onClick={() => !!navigate && navigate('/messages')}
             />
           )}
-          {visibleSearchIcon && (
+          {visibleCartIcon && (
             <IconButton
-              icon={'search'}
-              onClick={() => !!navigate && navigate('/search')}
+              icon="cart"
+              onClick={() => !!navigate && navigate('/cart')}
+              cartLength={cartLength}
             />
           )}
         </div>
       </div>
-      {visibleSearchBar && (
-        <div className='mt-2'>
-          <SearchBar
-            placeholderSearchBar={placeholderSearchBar}
-            visibleFilterIcon={visibleFilterIcon}
-            onClick={(href: string) => !!navigate && navigate(href)}
-          />
-        </div>
-      )}
     </div>
   )
 }

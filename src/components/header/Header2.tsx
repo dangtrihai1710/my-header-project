@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { FC } from 'react'
-import logoAimini from '@static/images/logo'
+import logoAimini from '../../static/images/logo'
 import { defaultHeader2, HeaderContainerProps } from './helper'
 import Header1 from './Header1'
 

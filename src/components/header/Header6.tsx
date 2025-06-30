@@ -1,6 +1,7 @@
+// 5. Fix Header6.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { FC } from 'react'
-import logoAimini from '@static/images/logo/Logo-Aimini.jpg'
+import logoAimini from '../../static/images/logo/Logo-Aimini.jpg'
 import { defaultHeader6, HeaderContainerProps } from './helper'
 import Header5 from './Header5'
 

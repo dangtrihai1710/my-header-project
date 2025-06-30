@@ -1,5 +1,6 @@
+// 6. Fix SearchBar.tsx
 import React from 'react'
-import IconSVG from '@components/common/IconSVG'
+import IconSVG from '../common/IconSVG'
 import './style.css'
 
 // Mock Bootstrap components if react-bootstrap is not installed
