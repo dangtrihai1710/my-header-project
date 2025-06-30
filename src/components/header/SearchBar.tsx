@@ -1,32 +1,47 @@
-import React, { FC } from 'react'
-// import { Form, InputGroup } from 'react-bootstrap' // Comment out if not installed
+import React from 'react'
 import IconSVG from '@components/common/IconSVG'
 import './style.css'
 
 // Mock Bootstrap components if react-bootstrap is not installed
 const Form = {
-  Control: FC<React.InputHTMLAttributes<HTMLInputElement>>(({ className, style, ...props }) => (
-    <input 
-      className={`form-control ${className || ''}`}
-      style={style}
-      {...props}
-    />
-  ))
+  Control: (props: React.InputHTMLAttributes<HTMLInputElement>) => {
+    const { className, style, ...rest } = props;
+    return (
+      <input 
+        className={`form-control ${className || ''}`}
+        style={style}
+        {...rest}
+      />
+    );
+  }
 };
 
-const InputGroup: FC<{ children: React.ReactNode; className?: string; onClick?: () => void; style?: React.CSSProperties }> & {
-  Text: FC<{ children: React.ReactNode; className?: string; id?: string }>
-} = ({ children, className, ...props }) => (
-  <div className={`input-group ${className || ''}`} {...props}>
-    {children}
-  </div>
-);
+interface InputGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
 
-InputGroup.Text = ({ children, className, ...props }) => (
-  <div className={`input-group-text ${className || ''}`} {...props}>
-    {children}
-  </div>
-);
+interface InputGroupTextProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  id?: string;
+}
+
+const InputGroup = (props: InputGroupProps) => {
+  const { children, className, ...rest } = props;
+  return (
+    <div className={`input-group ${className || ''}`} {...rest}>
+      {children}
+    </div>
+  );
+};
+
+InputGroup.Text = (props: InputGroupTextProps) => {
+  const { children, className, ...rest } = props;
+  return (
+    <div className={`input-group-text ${className || ''}`} {...rest}>
+      {children}
+    </div>
+  );
+};
 
 interface SearchBarProps {
   placeholderSearchBar: string
@@ -34,7 +49,7 @@ interface SearchBarProps {
   onClick: (href: string) => void
 }
 
-const SearchBar: FC<SearchBarProps> = ({ placeholderSearchBar, onClick }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ placeholderSearchBar, onClick }) => {
   return (
     <InputGroup
       className='rounded-pill overflow-hidden bg-white d-flex flex-nowrap align-items-center sticky-top border-input-group-header flex-1'

@@ -24,7 +24,6 @@ const IconSVG: React.FC<IconSVGProps> = ({
   className,
   onClick 
 }) => {
-  // Mock SVG icons with simple representations
   const getIcon = () => {
     switch (name) {
       case 'search':

@@ -1,31 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { FC } from 'react'
-// import { Buy, ChevronLeft, Home, Search } from 'react-iconly' // Comment out if not installed
+import React from 'react'
 import { HeaderContainerProps, defaultHeader5 } from './helper'
 import SearchBar from './SearchBar'
 import classNames from 'classnames'
 import { AppEnvironment } from '@helpers/linkApp'
 
 // Mock react-iconly icons if package is not installed
-const Buy: FC<{ size?: number }> = ({ size = 24 }) => (
+const Buy: React.FC<{ size?: number }> = ({ size = 24 }) => (
   <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     🛒
   </div>
 );
 
-const ChevronLeft: FC<{ size?: number }> = ({ size = 24 }) => (
+const ChevronLeft: React.FC<{ size?: number }> = ({ size = 24 }) => (
   <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     ←
   </div>
 );
 
-const Home: FC<{ size?: number }> = ({ size = 24 }) => (
+const Home: React.FC<{ size?: number }> = ({ size = 24 }) => (
   <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     🏠
   </div>
 );
 
-const Search: FC<{ size?: number }> = ({ size = 24 }) => (
+const Search: React.FC<{ size?: number }> = ({ size = 24 }) => (
   <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     🔍
   </div>
@@ -37,7 +36,7 @@ interface IconButtonProps {
   onClick: () => void
 }
 
-const IconButton: FC<IconButtonProps> = ({ icon, onClick }) => {
+const IconButton: React.FC<IconButtonProps> = ({ icon, onClick }) => {
   return (
     <div
       onClick={onClick}
@@ -54,7 +53,7 @@ const IconButton: FC<IconButtonProps> = ({ icon, onClick }) => {
   )
 }
 
-const Header5: FC<HeaderContainerProps> = (props) => {
+const Header5: React.FC<HeaderContainerProps> = (props) => {
   const { settings, cartLength, navigate, goBack } = props
   const isAiminiPlatform =
     new URLSearchParams(window.location.search).get('aimini_app_env') ===

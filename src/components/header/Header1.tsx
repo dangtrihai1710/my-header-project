@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import classNames from 'classnames'
-import React, { FC } from 'react'
+import React from 'react'
 import IconSVG, { Icons } from '@components/common/IconSVG'
 import logoAimini from '@static/images/logo'
 import { defaultHeader1, HeaderContainerProps } from './helper'
@@ -14,7 +14,7 @@ interface IconButtonProps {
   cartLength?: number
 }
 
-const IconButton: FC<IconButtonProps> = ({ icon, onClick, cartLength }) => {
+const IconButton: React.FC<IconButtonProps> = ({ icon, onClick, cartLength }) => {
   return (
     <div
       onClick={onClick}
@@ -58,7 +58,7 @@ const IconButton: FC<IconButtonProps> = ({ icon, onClick, cartLength }) => {
   )
 }
 
-const Header1: FC<HeaderContainerProps> = (props) => {
+const Header1: React.FC<HeaderContainerProps> = (props) => {
   const { settings, logo, cartLength, navigate } = props
 
   const {
@@ -114,6 +114,7 @@ const Header1: FC<HeaderContainerProps> = (props) => {
               className='me-2'
               style={{ height: 40, objectFit: 'contain', maxWidth: 80 }}
               src={logo || logoAimini}
+              alt="Logo"
             />
           )}
           <div>
