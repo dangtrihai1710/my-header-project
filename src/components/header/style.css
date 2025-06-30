@@ -1,0 +1,15 @@
+.border-input-group-header {
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.form-control-search-header {
+  border-width: 0px !important;
+  height: 100% !important;
+}
+
+.input-group-text-header {
+  padding-right: 1px !important;
+  padding-left: 8px !important;
+  border-width: 0px !important;
+  background-color: white !important;
+}

@@ -1,19 +1,30 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import './App.css';
+import { Header1, defaultHeader1 } from './components/header';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+function App() {
+  const handleNavigate = (href: string) => {
+    console.log('Navigate to:', href);
+  };
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+  return (
+    <div className="App">
+      <Header1
+        visible={true}
+        settings={{
+          ...defaultHeader1.settings,
+          title: "Test Header",
+          placeholderSearchBar: "Tìm kiếm..."
+        }}
+        cartLength={3}
+        navigate={handleNavigate}
+      />
+      <div style={{ padding: '20px' }}>
+        <h1>Header Component Test</h1>
+        <p>Header đang hiển thị ở trên!</p>
+      </div>
+    </div>
+  );
+}
+
+export default App;
