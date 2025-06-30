@@ -2,8 +2,6 @@
 /* eslint-disable react/prop-types */
 import React, { FC, ReactElement } from 'react'
 import { IonHeader, IonTitle, IonToolbar } from '@ionic/react'
-import { useLocation } from 'react-router-dom'
-import { useNavigate } from 'zmp-ui'
 
 import { useLink } from '@atom/link/useLink'
 import { useCart } from '@atom/cart/useCart'
@@ -20,8 +18,6 @@ interface HeaderContainerProps {
 }
 
 const HeaderContainer: FC<HeaderContainerProps> = ({ children, props }) => {
-  const navigate = useNavigate()
-  const location = useLocation()
   const { ref } = useIonHeaderCollapse()
   const { OA, appSetting } = useAppSetting()
   const { isAiminiPlatform } = useLink()
@@ -29,11 +25,17 @@ const HeaderContainer: FC<HeaderContainerProps> = ({ children, props }) => {
 
   const { background, translucent } = props.settings
 
-  const handleNavigate = (href) => {
+  const handleNavigate = (href: string): void => {
     if (isAiminiPlatform) return
     else {
       if (href == '/chat') contactOA({ oaType: OA.oaType, oaId: OA.oaId })
-      else navigate(href, { animate: false })
+      else {
+        // Mock navigation
+        console.log('Navigate to:', href);
+        if (props.navigate) {
+          props.navigate(href);
+        }
+      }
     }
   }
 
@@ -41,20 +43,15 @@ const HeaderContainer: FC<HeaderContainerProps> = ({ children, props }) => {
     ...props,
     logo: appSetting?.logo,
     cartLength: cart.length,
-    navigate: (href) => handleNavigate(href),
+    navigate: (href: string) => handleNavigate(href),
     goBack: () => {
       const listPathAllowGoBackInAimini = ['/category/result'] // danh sách các đường dẫn cho phép goback
 
-      // nếu là platform Aimini và trang hiện tại không nằm trong danh sách cho phép goback thì return
-      if (
-        isAiminiPlatform &&
-        !listPathAllowGoBackInAimini.some((path) =>
-          location.pathname.includes(path)
-        )
-      )
-        return
-      if (location.pathname == '/ordered-success') return navigate('/home') // trường hợp back trang order success
-      return navigate(-1)
+      // Mock goBack functionality
+      console.log('Go back called');
+      if (props.goBack) {
+        props.goBack();
+      }
     },
   }
 

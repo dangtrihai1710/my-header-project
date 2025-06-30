@@ -1,5 +1,9 @@
 import { useRef } from 'react';
 
-export const useIonHeaderCollapse = () => ({
-  ref: useRef(null)
-});
+export const useIonHeaderCollapse = () => {
+  const ref = useRef<HTMLIonHeaderElement>(null);
+  
+  return {
+    ref
+  };
+};

@@ -2,7 +2,7 @@
 import classNames from 'classnames'
 import React, { FC } from 'react'
 import IconSVG, { Icons } from '@components/common/IconSVG'
-import logoAimini from '@static/images/logo/Logo-Aimini.jpg'
+import logoAimini from '@static/images/logo'
 import { defaultHeader1, HeaderContainerProps } from './helper'
 import SearchBar from './SearchBar'
 import { isZaloPlatform } from '@components/utils'
