@@ -1,0 +1,4 @@
+
+const LogoAimini = 'https://via.placeholder.com/80x40/007bff/ffffff?text=AIMINI';
+
+export default LogoAimini;

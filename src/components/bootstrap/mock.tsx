@@ -1,17 +1,20 @@
 // src/components/bootstrap/mock.tsx
 // Mock Bootstrap components nếu react-bootstrap chưa được cài đặt
 
-import React, { FC, HTMLAttributes, InputHTMLAttributes } from 'react';
+import React, { HTMLAttributes, InputHTMLAttributes } from 'react';
 
 // Mock Form components
 export const Form = {
-  Control: FC<InputHTMLAttributes<HTMLInputElement>>(({ className, style, ...props }) => (
-    <input 
-      className={`form-control ${className || ''}`}
-      style={style}
-      {...props}
-    />
-  ))
+  Control: (props: InputHTMLAttributes<HTMLInputElement>) => {
+    const { className, style, ...rest } = props;
+    return (
+      <input 
+        className={`form-control ${className || ''}`}
+        style={style}
+        {...rest}
+      />
+    );
+  }
 };
 
 // Mock InputGroup components
@@ -24,17 +27,20 @@ interface InputGroupTextProps extends HTMLAttributes<HTMLDivElement> {
   id?: string;
 }
 
-export const InputGroup: FC<InputGroupProps> = ({ children, className, ...props }) => (
-  <div className={`input-group ${className || ''}`} {...props}>
-    {children}
-  </div>
-);
+export const InputGroup = (props: InputGroupProps) => {
+  const { children, className, ...rest } = props;
+  return (
+    <div className={`input-group ${className || ''}`} {...rest}>
+      {children}
+    </div>
+  );
+};
 
-InputGroup.Text = FC<InputGroupTextProps>(({ children, className, ...props }) => (
-  <div className={`input-group-text ${className || ''}`} {...props}>
-    {children}
-  </div>
-));
-
-// Cách sử dụng trong SearchBar.tsx:
-// import { Form, InputGroup } from './bootstrap/mock';
+InputGroup.Text = (props: InputGroupTextProps) => {
+  const { children, className, ...rest } = props;
+  return (
+    <div className={`input-group-text ${className || ''}`} {...rest}>
+      {children}
+    </div>
+  );
+};

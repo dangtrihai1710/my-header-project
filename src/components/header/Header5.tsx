@@ -1,39 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react'
-import { HeaderContainerProps, defaultHeader5 } from './helper'
-import SearchBar from './SearchBar'
-import classNames from 'classnames'
-import { AppEnvironment } from '@helpers/linkApp'
+import React, { FC } from 'react';
+import { defaultHeader5, HeaderContainerProps } from './helper';
+import SearchBar from './SearchBar';
 
-// Mock react-iconly icons if package is not installed
-const Buy: React.FC<{ size?: number }> = ({ size = 24 }) => (
-  <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    🛒
-  </div>
+// Mock icons để thay thế cho lucide-react
+const ArrowLeft = ({ size }: { size: number }) => (
+  <div style={{ fontSize: size * 0.8 }}>←</div>
 );
 
-const ChevronLeft: React.FC<{ size?: number }> = ({ size = 24 }) => (
-  <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    ←
-  </div>
+const Home = ({ size }: { size: number }) => (
+  <div style={{ fontSize: size * 0.8 }}>🏠</div>
 );
 
-const Home: React.FC<{ size?: number }> = ({ size = 24 }) => (
-  <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    🏠
-  </div>
+const Search = ({ size }: { size: number }) => (
+  <div style={{ fontSize: size * 0.8 }}>🔍</div>
 );
 
-const Search: React.FC<{ size?: number }> = ({ size = 24 }) => (
-  <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    🔍
-  </div>
+const Buy = ({ size }: { size: number }) => (
+  <div style={{ fontSize: size * 0.8 }}>🛒</div>
 );
 
 // Component IconButton cho Header5
 interface IconButtonProps {
-  icon: React.ReactNode
-  onClick: () => void
+  icon: React.ReactNode;
+  onClick: () => void;
 }
 
 const IconButton: React.FC<IconButtonProps> = ({ icon, onClick }) => {
@@ -42,22 +32,24 @@ const IconButton: React.FC<IconButtonProps> = ({ icon, onClick }) => {
       onClick={onClick}
       style={{
         cursor: 'pointer',
-        padding: '4px',
+        padding: '8px',
+        borderRadius: '50%',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        border: '1px solid rgba(0, 0, 0, 0.1)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        width: 40,
+        height: 40,
       }}
     >
       {icon}
     </div>
-  )
-}
+  );
+};
 
-const Header5: React.FC<HeaderContainerProps> = (props) => {
-  const { settings, cartLength, navigate, goBack } = props
-  const isAiminiPlatform =
-    new URLSearchParams(window.location.search).get('aimini_app_env') ===
-    AppEnvironment.Aimini
+const Header5: FC<HeaderContainerProps> = (props) => {
+  const { visible, settings, cartLength, navigate, goBack } = props;
 
   const {
     margin,
@@ -72,35 +64,36 @@ const Header5: React.FC<HeaderContainerProps> = (props) => {
     visibleCartIcon,
     visibleSearchIcon,
     visibleSearchBar,
+    visibleLeftIcon,
     placeholderSearchBar,
     visibleFilterIcon,
-    visibleLeftIcon = true,
-  } = settings || defaultHeader5.settings
+  } = settings || defaultHeader5.settings;
 
-  const headerStyle = {
-    margin,
-    padding,
-    background: 'transparent',
-    border,
-    borderRadius,
-    boxShadow,
-  }
+  if (!visible) return null;
 
   return (
-    <div style={headerStyle}>
+    <div
+      style={{
+        margin,
+        padding,
+        border,
+        borderRadius,
+        boxShadow,
+        background: 'white',
+      }}
+    >
       {visibleLeftIcon && (
-        <div className='d-flex align-items-center gap-2'>
-          <div
-            className='d-flex align-items-center justify-content-evenly rounded-pill'
-            style={{
-              width: 80,
-              height: 34,
-              border: '1px solid rgba(0, 0, 0, 0.1)',
-              backgroundColor: 'rgba(255, 255, 255, 0.6)',
-            }}
-          >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: visibleTitle ? 8 : 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <IconButton
-              icon={<ChevronLeft size={18} />}
+              icon={<ArrowLeft size={18} />}
               onClick={() => !!goBack && goBack()}
             />
             <div
@@ -137,13 +130,15 @@ const Header5: React.FC<HeaderContainerProps> = (props) => {
           style={{
             color: colorTitle,
             fontSize: fontSizeTitle,
+            textAlign: 'center',
+            marginTop: 8,
           }}
         >
           {title}
         </div>
       )}
       {visibleSearchBar && (
-        <div className='mt-2'>
+        <div style={{ marginTop: 8 }}>
           <SearchBar
             placeholderSearchBar={placeholderSearchBar}
             visibleFilterIcon={visibleFilterIcon}
@@ -152,7 +147,7 @@ const Header5: React.FC<HeaderContainerProps> = (props) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Header5
+export default Header5;
