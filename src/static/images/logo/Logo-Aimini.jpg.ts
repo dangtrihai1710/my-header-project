@@ -1,0 +1,1 @@
+export default '/images/Logo-Aimini.jpg';
