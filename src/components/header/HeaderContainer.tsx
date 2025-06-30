@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/prop-types */
 import React, { FC, ReactElement } from 'react'
-// import { IonHeader, IonTitle, IonToolbar } from '@ionic/react'
+
+import { useLink } from '@atom/link/useLink'
+import { useCart } from '@atom/cart/useCart'
+import { useAppSetting } from '@atom/app-setting/useAppSetting'
+import { convertBackground } from '@components/utils'
+import { useIonHeaderCollapse } from '@hooks/useIonHeaderCollapse'
+import { contactOA } from '@services/zalo-api'
+
+import { HeaderContainerProps } from './helper'
 
 // Mock Ionic components for testing
 const IonHeader: FC<any> = ({ children, ...props }) => (
@@ -13,19 +21,6 @@ const IonToolbar: FC<any> = ({ children, ...props }) => (
 const IonTitle: FC<any> = ({ children, ...props }) => (
   <div {...props}>{children}</div>
 )
-
-// Mock hooks and utilities
-const useIonHeaderCollapse = () => ({ ref: null })
-const useAppSetting = () => ({
-  OA: { oaType: 'mock', oaId: 'mock' },
-  appSetting: { logo: null }
-})
-const useLink = () => ({ isAiminiPlatform: false })
-const useCart = () => ({ cart: [] })
-const contactOA = (config: any) => console.log('Contact OA:', config)
-
-import { convertBackground } from '@components/utils'
-import { HeaderContainerProps } from './helper'
 
 interface HeaderContainerWrapperProps {
   children: ReactElement
@@ -56,7 +51,7 @@ const HeaderContainer: FC<HeaderContainerWrapperProps> = ({ children, props }) =
 
   const updatedProps: HeaderContainerProps = {
     ...props,
-    logo: appSetting?.logo,
+    logo: appSetting?.logo || undefined, // Fix type error: convert null to undefined
     cartLength: cart.length,
     navigate: (href: string) => handleNavigate(href),
     goBack: () => {

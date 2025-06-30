@@ -1,10 +1,35 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { FC } from 'react'
-import { Buy, ChevronLeft, Home, Search } from 'react-iconly'
+// import { Buy, ChevronLeft, Home, Search } from 'react-iconly' // Comment out if not installed
 import { HeaderContainerProps, defaultHeader5 } from './helper'
 import SearchBar from './SearchBar'
 import classNames from 'classnames'
 import { AppEnvironment } from '@helpers/linkApp'
+
+// Mock react-iconly icons if package is not installed
+const Buy: FC<{ size?: number }> = ({ size = 24 }) => (
+  <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    🛒
+  </div>
+);
+
+const ChevronLeft: FC<{ size?: number }> = ({ size = 24 }) => (
+  <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    ←
+  </div>
+);
+
+const Home: FC<{ size?: number }> = ({ size = 24 }) => (
+  <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    🏠
+  </div>
+);
+
+const Search: FC<{ size?: number }> = ({ size = 24 }) => (
+  <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    🔍
+  </div>
+);
 
 // Component IconButton cho Header5
 interface IconButtonProps {
