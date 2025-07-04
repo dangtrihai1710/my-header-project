@@ -1,24 +1,26 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { Header1, defaultHeader1 } from './components/header';
 
 function App() {
+  const handleNavigate = (href: string) => {
+    console.log('Navigate to:', href);
+    // Thêm logic navigation thực tế ở đây
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Header1
+        visible={true}
+        settings={{
+          ...defaultHeader1.settings,
+          title: "Test Header",
+          placeholderSearchBar: "Tìm kiếm..."
+        }}
+        cartLength={3}
+        navigate={handleNavigate}
+      />
+
     </div>
   );
 }

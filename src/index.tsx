@@ -1,30 +1,19 @@
 import React from 'react';
-import './App.css';
-import { Header1, defaultHeader1 } from './components/header';
+import ReactDOM from 'react-dom/client';
+import './index.css'; // Nếu có file CSS chung
+import App from './App';
+import reportWebVitals from './reportWebVitals'; // Nếu có
 
-function App() {
-  const handleNavigate = (href: string) => {
-    console.log('Navigate to:', href);
-  };
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 
-  return (
-    <div className="App">
-      <Header1
-        visible={true}
-        settings={{
-          ...defaultHeader1.settings,
-          title: "Test Header",
-          placeholderSearchBar: "Tìm kiếm..."
-        }}
-        cartLength={3}
-        navigate={handleNavigate}
-      />
-      <div style={{ padding: '20px' }}>
-        <h1>Header Component Test</h1>
-        <p>Header đang hiển thị ở trên!</p>
-      </div>
-    </div>
-  );
-}
-
-export default App;
+// Nếu bạn muốn đo performance trong app, truyền vào một function
+// để log kết quả (ví dụ: reportWebVitals(console.log))
+// hoặc gửi đến analytics endpoint. Tìm hiểu thêm: https://bit.ly/CRA-vitals
+// reportWebVitals();
