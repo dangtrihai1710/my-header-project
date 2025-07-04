@@ -1,6 +1,8 @@
+// src/components/ComponentEditor.tsx
 import React, { useState } from 'react';
 
-interface ComponentEditorProps {
+// Define props type properly
+type ComponentEditorProps = {
   component: any;
   onUpdate: (props: any, style: any) => void;
   onClose: () => void;

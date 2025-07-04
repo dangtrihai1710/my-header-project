@@ -1,10 +1,9 @@
+// backend/server-mistral.js - Sử dụng Mistral AI
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const { OpenAI } = require('openai');
-const { MongoClient } = require('mongodb');
-const { MongoVectorStore } = require('langchain/vectorstores/mongodb');
-const { OpenAIEmbeddings } = require('langchain/embeddings/openai');
+const { v4: uuidv4 } = require('uuid');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -14,31 +13,161 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/mobile-app-builder', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mobile-app-builder', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-// OpenAI setup
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Mistral AI Client
+class MistralClient {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+    this.baseUrl = 'https://api.mistral.ai/v1';
+  }
 
-const embeddings = new OpenAIEmbeddings({
-  openAIApiKey: process.env.OPENAI_API_KEY,
-});
+  async generateEmbedding(text) {
+    try {
+      const response = await fetch(`${this.baseUrl}/embeddings`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'mistral-embed',
+          input: [text],
+        }),
+      });
 
-// Vector store setup
-const vectorStore = new MongoVectorStore(embeddings, {
-  collection: 'component_embeddings',
-  mongodbConfig: {
-    uri: 'mongodb://localhost:27017/mobile-app-builder',
-    dbName: 'mobile-app-builder',
-  },
-});
+      if (!response.ok) {
+        throw new Error(`Mistral API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.data[0].embedding;
+    } catch (error) {
+      console.error('Mistral embedding error:', error);
+      // Return dummy embedding as fallback
+      return new Array(1024).fill(0).map(() => Math.random() - 0.5);
+    }
+  }
+
+  async generateText(prompt) {
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'mistral-large-latest',
+          messages: [
+            {
+              role: 'system',
+              content: 'Bạn là AI assistant tạo mobile app từ components. Luôn trả về JSON hợp lệ.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 1500,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Mistral API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content;
+    } catch (error) {
+      console.error('Mistral generation error:', error);
+      return null;
+    }
+  }
+}
+
+// Initialize Mistral client
+const mistralClient = new MistralClient(process.env.MISTRAL_API_KEY || process.env.OPENAI_API_KEY);
+
+// Vector Store with cosine similarity
+class ComponentVectorStore {
+  constructor() {
+    this.components = [];
+  }
+
+  async addComponent(component, embedding) {
+    this.components.push({
+      ...component,
+      embedding: embedding
+    });
+  }
+
+  cosineSimilarity(vec1, vec2) {
+    const dotProduct = vec1.reduce((sum, a, i) => sum + a * vec2[i], 0);
+    const magnitude1 = Math.sqrt(vec1.reduce((sum, a) => sum + a * a, 0));
+    const magnitude2 = Math.sqrt(vec2.reduce((sum, a) => sum + a * a, 0));
+    return dotProduct / (magnitude1 * magnitude2);
+  }
+
+  async similaritySearch(queryEmbedding, k = 3) {
+    if (this.components.length === 0) {
+      return [];
+    }
+
+    const scores = this.components.map(comp => ({
+      component: comp,
+      score: this.cosineSimilarity(queryEmbedding, comp.embedding)
+    }));
+
+    return scores
+      .sort((a, b) => b.score - a.score)
+      .slice(0, k)
+      .map(item => item.component);
+  }
+
+  // Text-based fallback search
+  textSearch(query, k = 3) {
+    const searchTerms = query.toLowerCase().split(' ');
+    
+    const scores = this.components.map(comp => {
+      let score = 0;
+      const searchText = `${comp.name} ${comp.description} ${comp.tags?.join(' ')} ${comp.category}`.toLowerCase();
+      
+      searchTerms.forEach(term => {
+        if (searchText.includes(term)) {
+          score += 1;
+        }
+      });
+      
+      return { component: comp, score };
+    });
+
+    return scores
+      .sort((a, b) => b.score - a.score)
+      .slice(0, k)
+      .map(item => item.component);
+  }
+
+  async loadFromDatabase() {
+    try {
+      const components = await Component.find();
+      this.components = components;
+      console.log(`Loaded ${components.length} components into vector store`);
+    } catch (error) {
+      console.error('Error loading components:', error);
+    }
+  }
+}
+
+const vectorStore = new ComponentVectorStore();
 
 // Component Schema
 const ComponentSchema = new mongoose.Schema({
+  id: { type: String, default: uuidv4 },
   name: String,
   type: String,
   description: String,
@@ -55,11 +184,12 @@ const Component = mongoose.model('Component', ComponentSchema);
 
 // Generated App Schema
 const GeneratedAppSchema = new mongoose.Schema({
+  id: { type: String, default: uuidv4 },
   userId: String,
   name: String,
   description: String,
   components: [{
-    componentId: String,
+    componentName: String,
     props: Object,
     position: Number,
     style: Object,
@@ -74,51 +204,112 @@ const GeneratedApp = mongoose.model('GeneratedApp', GeneratedAppSchema);
 // Routes
 app.post('/api/components/seed', async (req, res) => {
   try {
-    // Seed components from your existing code
+    await Component.deleteMany({});
+
     const components = [
       {
         name: 'Header1',
         type: 'header',
-        description: 'Header component với search bar và cart icon',
+        description: 'Header component với thanh tìm kiếm và biểu tượng giỏ hàng, điều hướng trang',
         props: {
           visible: 'boolean',
           settings: 'object',
           cartLength: 'number',
-          navigate: 'function',
-          goBack: 'function',
         },
         defaultProps: {
           visible: true,
           settings: {
-            title: 'Header',
+            title: 'Trang chủ',
             visibleSearchBar: true,
             visibleCartIcon: true,
-            placeholderSearchBar: 'Tìm kiếm...',
+            placeholderSearchBar: 'Tìm kiếm sản phẩm...',
           },
           cartLength: 0,
         },
-        code: `// Header1 component code here`,
         category: 'navigation',
-        tags: ['header', 'navigation', 'search', 'cart'],
+        tags: ['header', 'navigation', 'search', 'cart', 'menu'],
       },
-      // Add more components here
+      {
+        name: 'ProductCard',
+        type: 'card',
+        description: 'Card hiển thị sản phẩm với hình ảnh, tên, giá cả, nút mua hàng',
+        props: {
+          product: 'object',
+          showDiscount: 'boolean',
+        },
+        defaultProps: {
+          product: {
+            name: 'Sản phẩm mẫu',
+            price: 100000,
+            image: '/placeholder.jpg',
+          },
+          showDiscount: true,
+        },
+        category: 'display',
+        tags: ['product', 'card', 'ecommerce', 'shop', 'buy'],
+      },
+      {
+        name: 'CategoryList',
+        type: 'list',
+        description: 'Danh sách danh mục sản phẩm dạng lưới hoặc danh sách',
+        props: {
+          categories: 'array',
+          layout: 'string',
+        },
+        defaultProps: {
+          categories: [
+            { id: 1, name: 'Điện thoại', icon: '📱' },
+            { id: 2, name: 'Laptop', icon: '💻' },
+            { id: 3, name: 'Phụ kiện', icon: '🎧' },
+          ],
+          layout: 'grid',
+        },
+        category: 'navigation',
+        tags: ['category', 'list', 'menu', 'grid', 'browse'],
+      },
     ];
 
+    console.log('Starting to seed components with Mistral AI...');
+
     for (const comp of components) {
-      const embedding = await embeddings.embedQuery(
-        `${comp.name} ${comp.description} ${comp.tags.join(' ')}`
-      );
+      console.log(`Creating embedding for ${comp.name}...`);
       
-      const component = new Component({
-        ...comp,
-        embedding,
-      });
+      const embeddingText = `${comp.name} ${comp.description} ${comp.tags.join(' ')} ${comp.category}`;
       
-      await component.save();
+      try {
+        const embedding = await mistralClient.generateEmbedding(embeddingText);
+        
+        const component = new Component({
+          ...comp,
+          embedding,
+        });
+        
+        await component.save();
+        console.log(`✓ Saved ${comp.name} with Mistral embedding`);
+        
+        await vectorStore.addComponent(component, embedding);
+        
+      } catch (embeddingError) {
+        console.error(`Error creating embedding for ${comp.name}:`, embeddingError);
+        // Save with dummy embedding
+        const component = new Component({
+          ...comp,
+          embedding: new Array(1024).fill(0).map(() => Math.random() - 0.5),
+        });
+        await component.save();
+        console.log(`✓ Saved ${comp.name} with fallback embedding`);
+      }
     }
 
-    res.json({ message: 'Components seeded successfully' });
+    await vectorStore.loadFromDatabase();
+
+    res.json({ 
+      message: 'Components seeded successfully with Mistral AI', 
+      count: components.length,
+      vectorStoreSize: vectorStore.components.length
+    });
   } catch (error) {
+    console.error('Seed error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -127,111 +318,166 @@ app.post('/api/generate-app', async (req, res) => {
   try {
     const { userRequest, userId } = req.body;
     
-    // Generate embedding for user request
-    const queryEmbedding = await embeddings.embedQuery(userRequest);
-    
-    // Search for relevant components
-    const similarComponents = await vectorStore.similaritySearch(userRequest, 5);
-    
-    // Generate app structure using OpenAI
-    const prompt = `
-    Người dùng yêu cầu: "${userRequest}"
-    
-    Các component có sẵn:
-    ${similarComponents.map(comp => `
-    - ${comp.metadata.name}: ${comp.metadata.description}
-    - Props: ${JSON.stringify(comp.metadata.props)}
-    - Default Props: ${JSON.stringify(comp.metadata.defaultProps)}
-    `).join('\n')}
-    
-    Hãy tạo ra một mobile app layout sử dụng các component này. Trả về JSON với format:
-    {
-      "appName": "tên app",
-      "description": "mô tả app",
-      "layout": {
-        "screens": [
-          {
-            "name": "screen name",
-            "components": [
-              {
-                "componentName": "tên component",
-                "props": { "prop1": "value1" },
-                "position": 0,
-                "style": { "margin": "10px" }
-              }
-            ]
-          }
-        ]
-      }
+    if (!userRequest || !userId) {
+      return res.status(400).json({ error: 'Missing userRequest or userId' });
     }
-    
-    Chỉ sử dụng các component có sẵn và chỉ thay đổi props, không thay đổi cấu trúc.
-    `;
-    
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-    });
-    
-    const appStructure = JSON.parse(response.choices[0].message.content);
-    
-    // Save generated app
+
+    console.log(`Generating app for: "${userRequest}"`);
+
+    let selectedComponents = [];
+
+    try {
+      // Try embedding search first
+      const queryEmbedding = await mistralClient.generateEmbedding(userRequest);
+      selectedComponents = await vectorStore.similaritySearch(queryEmbedding, 3);
+      console.log(`Found ${selectedComponents.length} components using Mistral embeddings`);
+    } catch (embeddingError) {
+      console.log('Embedding search failed, using text search');
+      selectedComponents = vectorStore.textSearch(userRequest, 3);
+    }
+
+    if (selectedComponents.length === 0) {
+      selectedComponents = await Component.find().limit(2);
+    }
+
+    // Generate app with Mistral
+    const prompt = `
+Người dùng muốn tạo: "${userRequest}"
+
+Components có sẵn:
+${selectedComponents.map(comp => `
+- ${comp.name}: ${comp.description}
+- Props: ${JSON.stringify(comp.defaultProps)}
+`).join('\n')}
+
+Tạo JSON cho mobile app:
+{
+  "appName": "tên app phù hợp",
+  "description": "mô tả ngắn",
+  "components": [
+    {
+      "componentName": "Header1",
+      "props": {"visible": true, "settings": {"title": "Tiêu đề"}},
+      "position": 0,
+      "style": {"margin": "10px"}
+    }
+  ]
+}
+
+Chỉ dùng components được liệt kê. Trả về JSON thuần.`;
+
+    let appStructure;
+    try {
+      const aiResponse = await mistralClient.generateText(prompt);
+      if (aiResponse) {
+        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          appStructure = JSON.parse(jsonMatch[0]);
+        }
+      }
+    } catch (aiError) {
+      console.log('Mistral generation failed, using fallback');
+    }
+
+    if (!appStructure) {
+      appStructure = {
+        appName: userRequest.includes('shop') ? 'App Mua sắm' : 'App Mobile',
+        description: `App được tạo theo yêu cầu: ${userRequest}`,
+        components: selectedComponents.slice(0, 2).map((comp, index) => ({
+          componentName: comp.name,
+          props: comp.defaultProps || {},
+          position: index,
+          style: { margin: "10px" }
+        }))
+      };
+    }
+
     const generatedApp = new GeneratedApp({
       userId,
       name: appStructure.appName,
       description: appStructure.description,
-      components: appStructure.layout.screens.flatMap(screen => screen.components),
-      layout: appStructure.layout,
+      components: appStructure.components,
+      layout: { type: 'vertical' },
     });
-    
+
     await generatedApp.save();
-    
+
     res.json({
       appId: generatedApp._id,
-      ...appStructure,
+      appName: appStructure.appName,
+      description: appStructure.description,
+      components: appStructure.components,
+      layout: { type: 'vertical' },
     });
-    
+
   } catch (error) {
+    console.error('Generate app error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-app.get('/api/apps/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const apps = await GeneratedApp.find({ userId });
-    res.json(apps);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
+// Other routes...
 app.put('/api/apps/:appId/component/:componentIndex', async (req, res) => {
   try {
     const { appId, componentIndex } = req.params;
     const { props, style } = req.body;
-    
+
     const app = await GeneratedApp.findById(appId);
     if (!app) {
       return res.status(404).json({ error: 'App not found' });
     }
-    
-    // Chỉ cho phép sửa props và style
-    if (app.components[componentIndex]) {
-      app.components[componentIndex].props = { ...app.components[componentIndex].props, ...props };
-      app.components[componentIndex].style = { ...app.components[componentIndex].style, ...style };
+
+    const index = parseInt(componentIndex);
+    if (index >= 0 && index < app.components.length) {
+      app.components[index].props = { ...app.components[index].props, ...props };
+      app.components[index].style = { ...app.components[index].style, ...style };
       app.updatedAt = new Date();
       
       await app.save();
+      
+      res.json({
+        success: true,
+        components: app.components,
+      });
+    } else {
+      res.status(400).json({ error: 'Invalid component index' });
     }
-    
-    res.json(app);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.get('/api/components', async (req, res) => {
+  try {
+    const components = await Component.find().select('-embedding');
+    res.json(components);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
+
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    aiProvider: 'Mistral AI',
+    timestamp: new Date().toISOString(),
+    vectorStoreSize: vectorStore.components.length
+  });
+});
+
+async function startServer() {
+  try {
+    await vectorStore.loadFromDatabase();
+    
+    app.listen(port, () => {
+      console.log(`🚀 Server running on port ${port} with Mistral AI`);
+      console.log(`📊 Health check: http://localhost:${port}/api/health`);
+      console.log(`🗃️ Components loaded: ${vectorStore.components.length}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();

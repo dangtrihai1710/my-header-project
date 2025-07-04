@@ -1,15 +1,17 @@
+// src/components/ChatInterface.tsx
 import React, { useState } from 'react';
-import { AppPreview } from '/my-header-project/src/components/AppPreview';
-import { ComponentEditor } from '/my-header-project/src/components/ComponentEditor';
+import { AppPreview } from './AppPreview';
+import { ComponentEditor } from './ComponentEditor';
 
-interface ChatMessage {
+// Define types properly to avoid interface keyword issues
+type ChatMessage = {
   id: string;
   text: string;
   isUser: boolean;
   timestamp: Date;
 }
 
-interface GeneratedApp {
+type GeneratedApp = {
   appId: string;
   appName: string;
   description: string;
@@ -66,7 +68,7 @@ export const ChatInterface: React.FC = () => {
       } else {
         throw new Error(data.error || 'Đã có lỗi xảy ra');
       }
-    } catch (error: any) { // Fixed: Added type annotation
+    } catch (error: any) {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         text: `Xin lỗi, có lỗi xảy ra: ${error?.message || 'Lỗi không xác định'}`,
