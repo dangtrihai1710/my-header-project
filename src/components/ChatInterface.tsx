@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { AppPreview } from './AppPreview';
-import { ComponentEditor } from './ComponentEditor';
+import { AppPreview } from '/my-header-project/src/components/AppPreview';
+import { ComponentEditor } from '/my-header-project/src/components/ComponentEditor';
 
 interface ChatMessage {
   id: string;
