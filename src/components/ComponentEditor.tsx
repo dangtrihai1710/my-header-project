@@ -15,11 +15,11 @@ export const ComponentEditor: React.FC<ComponentEditorProps> = ({
   const [style, setStyle] = useState(component.style || {});
 
   const handlePropChange = (key: string, value: any) => {
-    setProps(prev => ({ ...prev, [key]: value }));
+    setProps((prev: any) => ({ ...prev, [key]: value }));
   };
 
   const handleStyleChange = (key: string, value: any) => {
-    setStyle(prev => ({ ...prev, [key]: value }));
+    setStyle((prev: any) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = () => {
@@ -43,21 +43,21 @@ export const ComponentEditor: React.FC<ComponentEditorProps> = ({
                 {typeof value === 'boolean' ? (
                   <input
                     type="checkbox"
-                    checked={value}
+                    checked={value as boolean}
                     onChange={(e) => handlePropChange(key, e.target.checked)}
                     className="rounded"
                   />
                 ) : typeof value === 'string' ? (
                   <input
                     type="text"
-                    value={value}
+                    value={value as string}
                     onChange={(e) => handlePropChange(key, e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 ) : typeof value === 'number' ? (
                   <input
                     type="number"
-                    value={value}
+                    value={value as number}
                     onChange={(e) => handlePropChange(key, Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -68,7 +68,7 @@ export const ComponentEditor: React.FC<ComponentEditorProps> = ({
                       try {
                         handlePropChange(key, JSON.parse(e.target.value));
                       } catch (error) {
-                        // Handle JSON parse error
+                        console.error('Invalid JSON:', error);
                       }
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -89,7 +89,7 @@ export const ComponentEditor: React.FC<ComponentEditorProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={style.margin || ''}
+                  value={(style.margin as string) || ''}
                   onChange={(e) => handleStyleChange('margin', e.target.value)}
                   placeholder="10px"
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -101,7 +101,7 @@ export const ComponentEditor: React.FC<ComponentEditorProps> = ({
                 </label>
                 <input
                   type="text"
-                  value={style.padding || ''}
+                  value={(style.padding as string) || ''}
                   onChange={(e) => handleStyleChange('padding', e.target.value)}
                   placeholder="10px"
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -26,8 +26,14 @@ export const AppPreview: React.FC<AppPreviewProps> = ({ app, onEditComponent }) 
         );
       default:
         return (
-          <div key={index} className="p-4 bg-gray-200 rounded">
-            Unknown component: {component.componentName}
+          <div key={index} className="p-4 bg-gray-200 rounded relative group">
+            <p>Unknown component: {component.componentName}</p>
+            <button
+              onClick={() => onEditComponent(index)}
+              className="absolute top-2 right-2 bg-blue-600 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              Chỉnh sửa
+            </button>
           </div>
         );
     }
@@ -44,8 +50,14 @@ export const AppPreview: React.FC<AppPreviewProps> = ({ app, onEditComponent }) 
         <div className="max-w-sm mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           {/* Mobile preview frame */}
           <div className="relative" style={{ aspectRatio: '9/16' }}>
-            {app.components.map((component: any, index: number) => 
-              renderComponent(component, index)
+            {app.components && app.components.length > 0 ? (
+              app.components.map((component: any, index: number) => 
+                renderComponent(component, index)
+              )
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                <p>Chưa có component nào</p>
+              </div>
             )}
           </div>
         </div>

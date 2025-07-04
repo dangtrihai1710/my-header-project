@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AppPreview } from './AppPreview';
 import { ComponentEditor } from './ComponentEditor';
 
@@ -64,12 +64,12 @@ export const ChatInterface: React.FC = () => {
         setMessages(prev => [...prev, botMessage]);
         setGeneratedApp(data);
       } else {
-        throw new Error(data.error);
+        throw new Error(data.error || 'Đã có lỗi xảy ra');
       }
-    } catch (error) {
+    } catch (error: any) { // Fixed: Added type annotation
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: `Xin lỗi, có lỗi xảy ra: ${error.message}`,
+        text: `Xin lỗi, có lỗi xảy ra: ${error?.message || 'Lỗi không xác định'}`,
         isUser: false,
         timestamp: new Date(),
       };
